@@ -1,0 +1,16 @@
+
+GET http://localhost:3000/note
+Content-Type: application/json
+
+###
+
+
+PATCH  http://localhost:3000/note
+Content-Type: application/json
+
+{
+    "code": "12345",     
+    "notebody": "typess here ..."
+}
+
+###

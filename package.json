@@ -1,0 +1,23 @@
+{
+  "name": "andranote1",
+  "version": "1.0.0",
+  "description": "andra's personal note",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js",
+    "prod": "node index.js"
+  },
+  "keywords": [
+    "note"
+  ],
+  "author": "muhammad rivandra-1810932007",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^4.8.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "nodemon": "^2.0.20",
+    "prisma": "^4.8.0"
+  }
+}
