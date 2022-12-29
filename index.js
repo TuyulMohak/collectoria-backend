@@ -7,7 +7,11 @@ const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 
 app.use(express.json())
-app.use(cors())
+app.use(
+    cors({
+        origin: "https://andranote.netlify.app/#/"
+    })
+)
 
 app.get('/note', async (req, res) => {
     const allData = await prisma.note.findFirst({
