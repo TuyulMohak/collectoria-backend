@@ -1,16 +1,22 @@
 
-GET http://localhost:3000/note
-Content-Type: application/json
-
-###
-
-
-PATCH  http://localhost:3000/note
+POST http://localhost:3000/schema
 Content-Type: application/json
 
 {
-    "code": "12345",     
-    "notebody": "typess here ..."
+    "schemeData":{
+        "name": "fourthScheme",
+        "phases": "sme"
+    }
+}
+
+
+###
+
+DELETE http://localhost:3000/schema
+Content-Type: application/json
+
+{
+    "schemeId": 5
 }
 
 ###

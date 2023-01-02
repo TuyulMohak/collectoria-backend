@@ -2,51 +2,46 @@ require("dotenv").config()
 const cors = require('cors')
 const express = require('express')
 const app = express()
-const { PrismaClient } = require('@prisma/client')
+const { PrismaClient, Prisma } = require('@prisma/client')
 
 const prisma = new PrismaClient()
 
 app.use(express.json())
 app.use(
     cors({
-        origin: "https://andranote.netlify.app/#/"
+        origin: "*"
     })
 )
 
-app.get('/note', async (req, res) => {
-    const allData = await prisma.note.findFirst({
-        where:{
-            name: 'andra'
-        }, select:{
-            name: true,
-            notebody: true
-        }
-    })
-    // console.log(allData)
-    res.json(allData)
-})
-
-app.patch('/note', async (req, res) => {
-    const {notebody, code} = req.body
-    const checkCode = await prisma.note.findFirst({
-        where: {
-            code: code
-        }
-    })
-
-    if (checkCode !== null) {
-        const changedNote = await prisma.note.update({
-            where:{
-                name: 'andra'
-            }, 
-            data:{ 
-                notebody: notebody
+app.post('/schema', async (req, res) => {
+    const { schemeData }= req.body
+    try{
+        const allData = await prisma.schema.create({
+            data:{
+                scheme: schemeData
             }
         })
-        res.status(200).send("updated sucessfully")
-    }  
-    else{
-        res.status(404).send("wrong code")
+        console.log(allData)
+        res.json(allData)
+    }catch(error){
+        res.send(error.message)
+    }
+})
+
+app.delete('/schema', async (req,res) =>{
+    const {schemeId} = req.body
+    // console.log(schemeId)
+    try{
+        const deleteData = await prisma.schema.delete({
+            where:{
+                id: schemeId
+            }
+        })
+        console.log(deleteData)
+        res.status(200).send("deleted")
+    }
+    catch(error){
+        res.status(400).send(error.message)
     }
 })
 

@@ -10,8 +10,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model note {
-  name     String @id
-  notebody String
-  code     String
+model Schema {
+  id     Int     @id @default(autoincrement())
+  scheme Json
+  thing  Thing[]
+}
+
+model Thing {
+  id         Int    @id @default(autoincrement())
+  time       Schema @relation(fields: [schemaId], references: [id])
+  schemaId   Int
+  timestamps Json
 }
