@@ -13,6 +13,17 @@ app.use(
     })
 )
 
+// all about schema
+app.get('/schema', async (req, res)=>{
+    try{
+        const allScheme = await prisma.schema.findMany()
+        res.json(allScheme) 
+    }
+    catch(error){
+        res.send(error.message)
+    } 
+})
+
 app.post('/schema', async (req, res) => {
     const { schemeData }= req.body
     try{
@@ -41,25 +52,89 @@ app.delete('/schema', async (req,res) =>{
         res.status(200).send("deleted")
     }
     catch(error){
-        res.status(400).send(error.message)
+        res.status(500).send(error.message)
     }
 })
 
+
+
+//all about the thing
+
+//get all thing on one scheme
+app.get('/thing', async (req,res)=>{
+    const {schemeId} = req.body
+    // console.log(scheme.id)
+    try{
+        const allThing = await prisma.schema.findFirst({
+            where:{
+                id:schemeId
+            },
+            include:{
+                thing: true
+            }
+        })
+        res.json(allThing)
+    }catch(error){
+        res.status(500).send(error)
+    }
+})
+//creating thing
+app.post('/thing', async(req,res)=>{
+    const {schemaId, timestamps} = req.body
+    // console.log(schema.id, timestamps)
+    try{
+        const addPost = await prisma.thing.create({
+            data:{
+                timestamps: timestamps,
+                time: {
+                    connect: {
+                        id: schemaId
+                    }
+                } 
+            }
+        })
+        res.json(addPost)
+    }
+    catch(error){
+        res.status(500).send(error.message)
+    }
+
+})
+//updating thing
+app.patch('/thing', async (req,res)=> {
+    const {thingId, timestamps} = req.body
+    // console.log(schema.id, timestamps)
+    try{
+        const addPost = await prisma.thing.update({
+            where:{
+                id: thingId
+            },data:{
+                timestamps: timestamps,
+            }
+        })
+        res.status(200).send("Successfuly updated")
+    }
+    catch(error){
+        res.status(500).send(error.message)
+    }
+})
+//deleting thing
+app.delete('/thing', async (req, res)=>{
+    const {thingId} = req.body
+    console.log(thingId)
+    try{
+        const deleteData = await prisma.thing.delete({
+            where:{
+                id: thingId
+            }
+        })
+        console.log(deleteData)
+        res.status(200).send("deleted")
+    }
+    catch(error){
+        res.status(500).send(error.message)
+    }
+})
+
+
 app.listen(3000, ()=> console.log("🚀 Server ready at: http://localhost:3000"))
-
-
-// async function main(){
-//     const allData = await prisma.note.findFirst({
-//         where: {
-//             name: 'andra',
-//         },
-//     })
-//     console.log(allData)
-// }
-
-// main().catch(e => {
-//     console.log(e.message)
-// })
-// .finally(async () => {
-//     await prisma.$disconnect()
-// })
