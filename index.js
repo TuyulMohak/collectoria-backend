@@ -61,16 +61,18 @@ app.delete('/schema', async (req,res) =>{
 //all about the thing
 
 //get all thing on one scheme
-app.get('/thing', async (req,res)=>{
-    const {schemeId} = req.body
+app.get('/thing/:id', async (req,res)=>{
+    // const {schemeId} = req.body
+    const schemeId = req.params.id
+    console.log(typeof(Number(schemeId)))
     // console.log(scheme.id)
     try{
         const allThing = await prisma.schema.findFirst({
             where:{
-                id:schemeId
+                id:Number(schemeId)
             },
             include:{
-                thing: true
+                thing: true,
             }
         })
         res.json(allThing)
@@ -78,9 +80,10 @@ app.get('/thing', async (req,res)=>{
         res.status(500).send(error)
     }
 })
+
 //creating thing
 app.post('/thing', async(req,res)=>{
-    const {schemaId, timestamps} = req.body
+    const {schemeId, timestamps} = req.body
     // console.log(schema.id, timestamps)
     try{
         const addPost = await prisma.thing.create({
@@ -88,7 +91,7 @@ app.post('/thing', async(req,res)=>{
                 timestamps: timestamps,
                 time: {
                     connect: {
-                        id: schemaId
+                        id: schemeId
                     }
                 } 
             }

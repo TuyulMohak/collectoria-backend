@@ -18,7 +18,7 @@ model Schema {
 
 model Thing {
   id         Int    @id @default(autoincrement())
-  time       Schema @relation(fields: [schemaId], references: [id])
+  time       Schema @relation(fields: [schemaId], references: [id], onDelete: Cascade)
   schemaId   Int
   timestamps Json
 }

@@ -4,14 +4,24 @@ GET http://localhost:3000/schema
 
 ###
 
-
 POST http://localhost:3000/schema
 Content-Type: application/json
 
 {
     "schemeData":{
-        "name": "gsfgdsgs",
-        "phases": "sme"
+        "name": "scheme1",
+        "phases": [
+            {
+                "position" : 1,
+                "name": "phase1",
+                "time": ""
+            },
+            {
+                "position" : 1,
+                "name": "phase1",
+                "time": ""
+            }
+        ]
     }
 }
 
@@ -22,16 +32,17 @@ DELETE http://localhost:3000/schema
 Content-Type: application/json
 
 {
-    "schemeId": 6
+    "schemeId": 8
 }
 
 ###
 
-GET http://localhost:3000/thing
+
+GET http://localhost:3000/thing/8
 Content-Type: application/json
 
 {
-    "schemeId": 8
+    "schemeId": 7
 }
 
 ###
@@ -40,7 +51,7 @@ POST http://localhost:3000/thing
 Content-Type: application/json
 
 {
-    "schemaId": 7,
+    "schemeId": 8,
     "timestamps": {
         "phases": [
             {
@@ -82,6 +93,7 @@ Content-Type: application/json
 }
 
 ###
+
 
 DELETE http://localhost:3000/thing
 Content-Type: application/json
