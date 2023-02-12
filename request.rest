@@ -1,49 +1,26 @@
-
-
-GET http://localhost:3000/schema
+GET http://localhost:3000/frames
 
 ###
+GET http://localhost:3000/frames/15
 
-POST http://localhost:3000/schema
+###
+POST http://localhost:3000/frames
 Content-Type: application/json
 
 {
-    "schemeData":{
-        "name": "scheme1",
-        "phases": [
-            {
-                "position" : 1,
-                "name": "phase1",
-                "time": ""
-            },
-            {
-                "position" : 1,
-                "name": "phase1",
-                "time": ""
-            }
-        ]
+    "data":{
+        "name": "frame1",
+        "framePhases": [{"name": "p1"}],
+        "frameInputs": [{"name": "In1"},{"name": "In1"}]
     }
 }
 
 
 ###
 
-DELETE http://localhost:3000/schema
+DELETE http://localhost:3000/frames/10
 Content-Type: application/json
 
-{
-    "schemeId": 8
-}
-
-###
-
-
-GET http://localhost:3000/thing/8
-Content-Type: application/json
-
-{
-    "schemeId": 7
-}
 
 ###
 
@@ -51,53 +28,53 @@ POST http://localhost:3000/thing
 Content-Type: application/json
 
 {
-    "schemeId": 8,
-    "timestamps": {
-        "phases": [
-            {
-                "position": 1,
-                "name": "phaseX",
-                "time": "1jun"
-            },
-            {
-                "position": 2,
-                "name": "phaseX",
-                "time": "2jun"
-            }
-        ]
+    "data":{
+        "frameId": 15
     }
 }
 
-
 ###
 
-PATCH http://localhost:3000/thing
+POST http://localhost:3000/times
 Content-Type: application/json
 
 {
-    "thingId": 4,
-    "timestamps": {
-        "phases": [
-            {
-                "position": 1,
-                "name": "phasew",
-                "time": "1jun"
-            },
-            {
-                "position": 2,
-                "name": "phasew",
-                "time": "2jun"
-            }
-        ]
+    "data":{
+        "timestamp": "12 malam",
+        "thingId": 11,
+        "framePhaseId": 14
     }
 }
 
 ###
-
 
 DELETE http://localhost:3000/thing
 Content-Type: application/json
 
 {
-    "thingId": 2
+    "data":{
+        "thingId": 15
+    }
+}
+
+########
+
+POST http://localhost:3000/inputs
+Content-Type: application/json
+
+{
+    "data":{
+        "inputs": [
+            {
+                "text": "first",
+                "thingId": 14 ,
+                "frameInputId": 16  
+            },
+            {
+                "text": "second",
+                "thingId": 14,
+                "frameInputId": 17  
+            }
+        ]
+    }
 }

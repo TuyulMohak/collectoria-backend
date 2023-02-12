@@ -10,15 +10,54 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Schema {
-  id     Int     @id @default(autoincrement())
-  scheme Json
-  thing  Thing[]
+model Frames {
+  id          Int           @id @default(autoincrement())
+  name        String
+  thing       Thing[]
+  framePhases FramePhases[]
+  frameInputs FrameInputs[]
+}
+
+model FramePhases {
+  id      Int     @id @default(autoincrement())
+  frameId Int
+  frame   Frames  @relation(fields: [frameId], references: [id], onDelete: Cascade)
+  name    String
+  times   Times[]
+}
+
+model FrameInputs {
+  id      Int      @id @default(autoincrement())
+  frameId Int
+  frame   Frames   @relation(fields: [frameId], references: [id], onDelete: Cascade)
+  name    String
+  Inputs  Inputs[]
 }
 
 model Thing {
-  id         Int    @id @default(autoincrement())
-  time       Schema @relation(fields: [schemaId], references: [id], onDelete: Cascade)
-  schemaId   Int
-  timestamps Json
+  id      Int      @id @default(autoincrement())
+  frameId Int
+  frame   Frames   @relation(fields: [frameId], references: [id], onDelete: Cascade)
+  times   Times[]
+  Inputs  Inputs[]
+}
+
+model Times {
+  id           Int         @id @default(autoincrement())
+  thingId      Int
+  framePhaseId Int
+  timestamp    String
+  thing        Thing       @relation(fields: [thingId], references: [id], onDelete: Cascade)
+  framePhases  FramePhases @relation(fields: [framePhaseId], references: [id], onDelete: Cascade)
+}
+
+model Inputs {
+  id           Int         @id @default(autoincrement())
+  thingId      Int
+  frameInputId Int
+  text         String
+  thing        Thing       @relation(fields: [thingId], references: [id], onDelete: Cascade)
+  frameInputs  FrameInputs @relation(fields: [frameInputId], references: [id], onDelete: Cascade)
+
+  @@unique([thingId, frameInputId])
 }

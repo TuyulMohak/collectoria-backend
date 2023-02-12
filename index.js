@@ -14,42 +14,98 @@ app.use(
 )
 
 // all about schema
-app.get('/schema', async (req, res)=>{
+app.get('/frames', async (req, res)=>{
     try{
-        const allScheme = await prisma.schema.findMany()
-        res.json(allScheme) 
+        const allframes = await prisma.frames.findMany()
+        res.json({
+            message: "Success",
+            data: allframes
+        }) 
     }
     catch(error){
         res.send(error.message)
     } 
 })
 
-app.post('/schema', async (req, res) => {
-    const { schemeData }= req.body
+app.get('/frames/:id', async (req,res) =>{
+    const id = req.params.id
     try{
-        const allData = await prisma.schema.create({
-            data:{
-                scheme: schemeData
+        const calledData = await prisma.frames.findFirst({
+            where:{
+                id: Number(id)
+            },
+            include:{
+                framePhases: {
+                    select:{
+                        id: true,
+                        name: true
+                    }
+                },
+                frameInputs:{
+                    select:{
+                        id: true,
+                        name: true
+                    }
+                },
+                thing: {
+                    include:{
+                        times: true
+                    }
+                }
             }
         })
-        console.log(allData)
-        res.json(allData)
+        // console.log(deleteData)
+        if(calledData){
+            res.json({
+                message: "Success",
+                data: calledData
+            })
+        }
+        else{
+            res.status(400).send("Data with id:"+id+" not exist")        }
+    }
+    catch(error){
+        res.status(500).send(error.message)
+    }
+})
+
+app.post('/frames', async (req, res) => {
+    const { data }= req.body
+    try{
+        const inputData = await prisma.frames.create({
+            data:{
+                name: data.name,
+                framePhases:{
+                    create: data.framePhases
+                },
+                frameInputs:{
+                    create: data.frameInputs 
+                }
+            },
+            include: {
+                framePhases: true,
+                frameInputs: true
+            }
+        })
+        res.json({
+            message: "success",
+            inputData
+        })
     }catch(error){
         res.send(error.message)
     }
 })
 
-app.delete('/schema', async (req,res) =>{
-    const {schemeId} = req.body
-    // console.log(schemeId)
+app.delete('/frames/:id', async (req,res) =>{
+    const id = req.params.id
     try{
-        const deleteData = await prisma.schema.delete({
+        const deleteData = await prisma.frames.delete({
             where:{
-                id: schemeId
+                id: Number(id)
             }
         })
-        console.log(deleteData)
-        res.status(200).send("deleted")
+        // console.log(deleteData)
+        res.status(200).send("deleted item with id:"+deleteData.id+", name:"+deleteData.name)
     }
     catch(error){
         res.status(500).send(error.message)
@@ -57,86 +113,113 @@ app.delete('/schema', async (req,res) =>{
 })
 
 
-
 //all about the thing
-
-//get all thing on one scheme
-app.get('/thing/:id', async (req,res)=>{
-    // const {schemeId} = req.body
-    const schemeId = req.params.id
-    console.log(typeof(Number(schemeId)))
-    // console.log(scheme.id)
-    try{
-        const allThing = await prisma.schema.findFirst({
-            where:{
-                id:Number(schemeId)
-            },
-            include:{
-                thing: true,
-            }
-        })
-        res.json(allThing)
-    }catch(error){
-        res.status(500).send(error)
-    }
-})
-
 //creating thing
-app.post('/thing', async(req,res)=>{
-    const {schemeId, timestamps} = req.body
-    // console.log(schema.id, timestamps)
+app.post('/thing', async (req,res)=>{
+    const {data} = req.body
     try{
-        const addPost = await prisma.thing.create({
+        const inputData = await prisma.thing.create({
             data:{
-                timestamps: timestamps,
-                time: {
+                frame: {
                     connect: {
-                        id: schemeId
+                        id: data.frameId
                     }
                 } 
             }
         })
-        res.json(addPost)
+        res.json(inputData)
     }
     catch(error){
         res.status(500).send(error.message)
     }
 
 })
-//updating thing
-app.patch('/thing', async (req,res)=> {
-    const {thingId, timestamps} = req.body
-    // console.log(schema.id, timestamps)
-    try{
-        const addPost = await prisma.thing.update({
-            where:{
-                id: thingId
-            },data:{
-                timestamps: timestamps,
-            }
-        })
-        res.status(200).send("Successfuly updated")
-    }
-    catch(error){
-        res.status(500).send(error.message)
-    }
-})
+
 //deleting thing
 app.delete('/thing', async (req, res)=>{
-    const {thingId} = req.body
-    console.log(thingId)
+    const { data } = req.body
     try{
         const deleteData = await prisma.thing.delete({
             where:{
-                id: thingId
+                id: data.thingId
             }
         })
-        console.log(deleteData)
+        // console.log(deleteData)
         res.status(200).send("deleted")
     }
     catch(error){
         res.status(500).send(error.message)
     }
+})
+
+app.post('/times', async (req,res)=>{
+    const { data } = req.body
+    try{
+        const isDataExist = await prisma.times.findFirst({
+            where:{
+                AND:[
+                    {
+                        thingId:{ 
+                            equals:data.thingId
+                        }
+                    },
+                    {
+                        framePhaseId:{ 
+                            equals:data.framePhaseId
+                        }
+                    }
+                ]
+            }
+        })
+
+        if(isDataExist){
+            res.status(400).send("data already exist")
+        }else{
+            const inputData = await prisma.times.create({
+                data:{
+                    timestamp: data.timestamp,
+                    thing: {
+                        connect: {
+                            id: data.thingId
+                        }
+                    },
+                    framePhases: {
+                        connect: {
+                            id: data.framePhaseId
+                        }
+                    } 
+                }
+            })
+            res.json(inputData)
+        }
+    }
+    catch(error){
+        res.status(500).send(error.message)
+    }
+
+})
+
+app.post('/inputs', async (req,res)=>{
+    const { data } = req.body
+
+    let inputs = data.inputs.map(obj=>{
+        return {
+            text: obj.text,
+            thingId: obj.thingId,
+            frameInputId: obj.frameInputId
+        }
+    })
+
+    try{
+        const inputData = await prisma.inputs.createMany({
+            data:inputs
+        })
+        res.json(inputData)
+    }
+    catch(error){
+        res.status(500).send(error.message)
+    }
+
 })
 
 
