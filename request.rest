@@ -1,7 +1,7 @@
 GET http://localhost:3000/frames
 
 ###
-GET http://localhost:3000/frames/15
+GET http://localhost:3000/frame/32
 
 ###
 POST http://localhost:3000/frames
@@ -9,16 +9,16 @@ Content-Type: application/json
 
 {
     "data":{
-        "name": "frame1",
-        "framePhases": [{"name": "p1"}],
-        "frameInputs": [{"name": "In1"},{"name": "In1"}]
+        "name": "newFrame",
+        "framePhases": [{"name": "phase1"},{"name": "phase2"}],
+        "frameInputs": [{"name": "Inp1"},{"name": "Inp2"}]
     }
 }
 
 
 ###
 
-DELETE http://localhost:3000/frames/10
+DELETE http://localhost:3000/frame/10
 Content-Type: application/json
 
 
@@ -29,52 +29,83 @@ Content-Type: application/json
 
 {
     "data":{
-        "frameId": 15
+        "frameId": 36,
+        "frameInputs": [{"frameInputId": 74, "text":""},{"frameInputId": 75,"text":""}],
+        "framePhases": [{"framePhaseId": 78, "timestamp":""}]
     }
 }
 
 ###
 
-POST http://localhost:3000/times
+POST http://localhost:3000/manythings
 Content-Type: application/json
 
 {
-    "data":{
-        "timestamp": "12 malam",
-        "thingId": 11,
-        "framePhaseId": 14
+    "data":[{
+        "frameId": 36,
+        "frameInputs": [{"frameInputId": 74, "text":""},{"frameInputId": 75,"text":""}],
+        "framePhases": [{"framePhaseId": 78, "timestamp":""}]
+    }, 
+    {
+        "frameId": 36,
+        "frameInputs": [{"frameInputId": 74, "text":""},{"frameInputId": 75,"text":""}],
+        "framePhases": [{"framePhaseId": 78, "timestamp":""}]
+    },
+    {
+        "frameId": 36,
+        "frameInputs": [{"frameInputId": 74, "text":""},{"frameInputId": 75,"text":""}],
+        "framePhases": [{"framePhaseId": 78, "timestamp":""}]
     }
+    ]
 }
 
 ###
 
-DELETE http://localhost:3000/thing
+DELETE http://localhost:3000/thing/202
 Content-Type: application/json
-
-{
-    "data":{
-        "thingId": 15
-    }
-}
 
 ########
 
-POST http://localhost:3000/inputs
+PATCH http://localhost:3000/inputs
+Content-Type: application/json
+
+{
+    "data":{
+        "id": 1042, 
+        "text": "first"
+    }
+    
+}
+
+###
+
+PATCH http://localhost:3000/inputs
 Content-Type: application/json
 
 {
     "data":{
         "inputs": [
             {
-                "text": "first",
-                "thingId": 14 ,
-                "frameInputId": 16  
+                "id": 40,
+                "text": "kelima"
             },
             {
-                "text": "second",
-                "thingId": 14,
-                "frameInputId": 17  
+                "id": 41,
+                "text": "keenam"  
             }
         ]
     }
 }
+
+####
+
+PATCH http://localhost:3000/times
+Content-Type: application/json
+
+{
+    "data":{
+        "id": 187
+    }
+}
+
+###

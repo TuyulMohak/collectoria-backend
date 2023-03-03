@@ -17,17 +17,14 @@ app.use(
 app.get('/frames', async (req, res)=>{
     try{
         const allframes = await prisma.frames.findMany()
-        res.json({
-            message: "Success",
-            data: allframes
-        }) 
+        res.json(allframes) 
     }
     catch(error){
         res.send(error.message)
     } 
 })
 
-app.get('/frames/:id', async (req,res) =>{
+app.get('/frame/:id', async (req,res) =>{
     const id = req.params.id
     try{
         const calledData = await prisma.frames.findFirst({
@@ -48,18 +45,29 @@ app.get('/frames/:id', async (req,res) =>{
                     }
                 },
                 thing: {
-                    include:{
-                        times: true
+                    select:{
+                        id:true,
+                        times: {
+                            select:{
+                                id:true,
+                                framePhaseId: true,
+                                timestamp:true
+                            }
+                        },
+                        inputs: {
+                            select:{
+                                id: true,
+                                frameInputId: true,
+                                text: true
+                            }
+                        }
                     }
                 }
             }
         })
         // console.log(deleteData)
         if(calledData){
-            res.json({
-                message: "Success",
-                data: calledData
-            })
+            res.json(calledData)
         }
         else{
             res.status(400).send("Data with id:"+id+" not exist")        }
@@ -87,18 +95,15 @@ app.post('/frames', async (req, res) => {
                 frameInputs: true
             }
         })
-        res.json({
-            message: "success",
-            inputData
-        })
+        res.json(inputData)
     }catch(error){
         res.send(error.message)
     }
 })
 
-app.delete('/frames/:id', async (req,res) =>{
+app.delete('/frame/:id', async (req,res) =>{
     const id = req.params.id
-    try{
+    try {
         const deleteData = await prisma.frames.delete({
             where:{
                 id: Number(id)
@@ -117,6 +122,7 @@ app.delete('/frames/:id', async (req,res) =>{
 //creating thing
 app.post('/thing', async (req,res)=>{
     const {data} = req.body
+
     try{
         const inputData = await prisma.thing.create({
             data:{
@@ -124,10 +130,67 @@ app.post('/thing', async (req,res)=>{
                     connect: {
                         id: data.frameId
                     }
-                } 
+                },
+                inputs:{
+                    createMany:{
+                        data: data.frameInputs
+                    }
+                },
+                times:{
+                    createMany:{
+                        data:data.framePhases
+                    }
+                }
+            },include:{
+                inputs:true,
+                times:true
             }
         })
         res.json(inputData)
+    }
+    catch(error){
+        res.status(500).send(error.message)
+    }
+
+})
+
+// manythings currently unavailable, due to confusion hehehe
+app.post('/manythings', async (req,res)=>{
+    const {data} = req.body
+    const arrThings = []
+    for (let i=0;i<data.count;i++){
+        arrThings.push(data.thing)
+    }
+    try{
+        const resThings = []
+        
+        for(const ting of arrThings){
+            const createdItem = await prisma.thing.create({
+                data:{
+                    frame: {
+                        connect: {
+                            id: Number(ting.frameId)
+                        }
+                    },
+                    inputs:{
+                        createMany:{
+                            data: ting.frameInputs
+                        }
+                    },
+                    times:{
+                        createMany:{
+                            data:ting.framePhases
+                        }
+                    }
+                },include:{
+                    inputs:true,
+                    times:true
+                }
+            })
+            resThings.push(createdItem)          
+        }
+        
+        res.json(resThings)
     }
     catch(error){
         res.status(500).send(error.message)
@@ -136,62 +199,34 @@ app.post('/thing', async (req,res)=>{
 })
 
 //deleting thing
-app.delete('/thing', async (req, res)=>{
-    const { data } = req.body
+app.delete('/thing/:id', async (req, res)=>{
+    const id = req.params.id
     try{
         const deleteData = await prisma.thing.delete({
             where:{
-                id: data.thingId
+                id: Number(id)
             }
         })
         // console.log(deleteData)
-        res.status(200).send("deleted")
+        res.status(200).json(deleteData)
     }
     catch(error){
         res.status(500).send(error.message)
     }
 })
 
-app.post('/times', async (req,res)=>{
-    const { data } = req.body
+app.patch('/times', async (req,res)=>{
+    const { data} = req.body
     try{
-        const isDataExist = await prisma.times.findFirst({
+        const result = await prisma.times.update({
             where:{
-                AND:[
-                    {
-                        thingId:{ 
-                            equals:data.thingId
-                        }
-                    },
-                    {
-                        framePhaseId:{ 
-                            equals:data.framePhaseId
-                        }
-                    }
-                ]
+                id: Number(data.id)
+            },
+            data:{
+                timestamp: data.timestamp
             }
         })
-
-        if(isDataExist){
-            res.status(400).send("data already exist")
-        }else{
-            const inputData = await prisma.times.create({
-                data:{
-                    timestamp: data.timestamp,
-                    thing: {
-                        connect: {
-                            id: data.thingId
-                        }
-                    },
-                    framePhases: {
-                        connect: {
-                            id: data.framePhaseId
-                        }
-                    } 
-                }
-            })
-            res.json(inputData)
-        }
+        res.json(result)
     }
     catch(error){
         res.status(500).send(error.message)
@@ -199,22 +234,20 @@ app.post('/times', async (req,res)=>{
 
 })
 
-app.post('/inputs', async (req,res)=>{
+app.patch('/inputs', async (req,res)=>{
     const { data } = req.body
 
-    let inputs = data.inputs.map(obj=>{
-        return {
-            text: obj.text,
-            thingId: obj.thingId,
-            frameInputId: obj.frameInputId
-        }
-    })
-
     try{
-        const inputData = await prisma.inputs.createMany({
-            data:inputs
+        const result = await prisma.inputs.update({
+            where:{
+                id: Number(data.id)
+            },
+            data:{
+                text: data.text
+            }
         })
-        res.json(inputData)
+        
+        res.json(result)
     }
     catch(error){
         res.status(500).send(error.message)
@@ -222,5 +255,29 @@ app.post('/inputs', async (req,res)=>{
 
 })
 
+// app.patch('/inputs', async (req,res)=>{
+//     const { data } = req.body
+
+//     try{
+//         result = []
+//         for(let input of data.inputs){
+//             await prisma.inputs.update({
+//                 where:{
+//                     id: Number(input.id)
+//                 },
+//                 data:{
+//                     text: input.text
+//                 }
+//             }).then(dat => {
+//                 result.push(dat)
+//             })
+//         }
+//         res.json(result)
+//     }
+//     catch(error){
+//         res.status(500).send(error.message)
+//     }
+
+// })
 
 app.listen(3000, ()=> console.log("🚀 Server ready at: http://localhost:3000"))

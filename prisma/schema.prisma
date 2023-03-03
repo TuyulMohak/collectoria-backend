@@ -39,7 +39,7 @@ model Thing {
   frameId Int
   frame   Frames   @relation(fields: [frameId], references: [id], onDelete: Cascade)
   times   Times[]
-  Inputs  Inputs[]
+  inputs  Inputs[]
 }
 
 model Times {
